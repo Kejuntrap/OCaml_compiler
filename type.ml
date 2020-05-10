@@ -18,6 +18,7 @@ type value =
 let rec eval1 e =
   match e with
   | Integer_(n) -> Integer(n)   (* 「整数のみが書いてある」という式の型という情報が与えられているので整数型に変更する *)
+  | Boolean_(b) -> Boolean(b) 
   | Plus(e1,e2) -> 
     begin match(eval1 e1 , eval1 e2) with
     | (Integer(n1),Integer(n2)) -> Integer(n1+n2)
@@ -40,8 +41,20 @@ let rec eval1 e =
         Integer(n1/n2)
       else
         failwith "Division_by_zero"
-    end
     | _ -> failwith "Integer values expected"
+    end
+  | Eq(e1,e2) ->
+    begin match(eval1 e1 ,eval1 e2) with
+    | (Integer(n1), Integer(n2)) -> Boolean(n1=n2)
+    | (Boolean(b1), Boolean(b2)) -> Boolean(b1=b2)
+    | _ -> failwith "wrong value"
+    end
+  | If(e1,e2,e3) -> (* if(条件) 真のとき 偽の時 的な実装っぽい *)
+    begin match(eval1 e1) with
+    | Boolean(true) -> eval1 e2
+    | Boolean(false) -> eval1 e3
+    | _ -> failwith "wrong value"
+    end
 ;;
 
 
@@ -52,3 +65,8 @@ let res = eval1(Minus( Integer_ 6 , Integer_ 7));;
 let res = eval1(Times( Integer_ 6 , Integer_ 7));;
 
 let res = eval1(Div( Integer_ 6 , Integer_ 0));;
+
+
+let res = (Plus(Boolean_ true, Boolean_ true));;
+
+let res = (If(Eq(Integer(7), Integer(6)), 0,1));;
